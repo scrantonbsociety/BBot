@@ -129,4 +129,4 @@ dmypy.json
 .pyre/
 
 # Config files used in bot
-.config
+*.config
