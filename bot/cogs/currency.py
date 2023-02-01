@@ -2,7 +2,7 @@ import discord
 import json
 import random
 from discord.ext import commands
-class Work(commands.Cog):
+class Currency(commands.Cog):
     def __init__(self, nbot):
         self.bot = nbot
         self.ans = {}
@@ -31,4 +31,4 @@ class Work(commands.Cog):
                 await self.newMath(message.channel.id)
 
 async def setup(bot):
-    await bot.add_cog(Work(bot))
+    await bot.add_cog(Currency(bot))
