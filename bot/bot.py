@@ -20,7 +20,10 @@ def findAllCogs(fname):
             clist = clist + findAllCogs(fname + "\\" + path)
         return clist
     else:
-        return [fname.replace("\\",".")[:-3]]
+        if fname.endswith(".py"):
+            return [fname.replace("\\",".")[:-3]]
+        else:
+            return []
 async def load():
     for cog in findAllCogs("cogs"):
         await bot.load_extension(cog)

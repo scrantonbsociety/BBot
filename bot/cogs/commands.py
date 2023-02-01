@@ -7,5 +7,4 @@ class Commands(commands.Cog):
         await ctx.send("Pong!!")
 
 async def setup(bot):
-    # print("hello world")
     await bot.add_cog(Commands(bot))
