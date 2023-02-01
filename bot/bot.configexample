@@ -1,3 +1,6 @@
 {
-    "prefix":"/"
+    "prefix":"/",
+    "workChannels":[
+        1234
+    ]
 }
