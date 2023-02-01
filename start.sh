@@ -1,5 +1,5 @@
 #!/bin/sh
-cd bot
+# cd bot
 while true
 do
     echo "pulling updated bot"
