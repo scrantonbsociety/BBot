@@ -9,7 +9,7 @@ bot = ""
 def loadConfig():
     global token
     global prefix
-    with open("token.config","r") as f:
+    with open("auth.config","r") as f:
         token = json.load(f)["token"]
     with open("bot.config","r") as f:
         prefix = json.load(f)["prefix"]
@@ -25,8 +25,11 @@ def findAllCogs(fname):
         else:
             return []
 async def load():
-    for cog in findAllCogs("cogs"):
+    cogs = findAllCogs("cogs")
+    print("{} cogs".format(len(cogs)))
+    for cog in cogs:
         await bot.load_extension(cog)
+    print("cogs loaded")
 loadConfig()
 intents = discord.Intents.default()
 intents.message_content = True

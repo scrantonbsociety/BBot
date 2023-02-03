@@ -1,0 +1,10 @@
+{
+    "token":"",
+    "sql":{
+        "host":"ip",
+        "port":"port",
+        "username":"user",
+        "password":"pass",
+        "database":"db"
+    }
+}
