@@ -1,10 +1,15 @@
-import psycopg2
+import asyncpg
 import json
 import random
 import uuid
-with open("auth.config","r") as f:
-    dbconf = json.load(f)["sql"]
-con = psycopg2.connect(database = dbconf["database"], user = dbconf["username"], password = dbconf["password"], host=dbconf["host"], port=dbconf["port"])
+class db:
+    def __init__(self,dbconf):
+        self.conf = dbconf
+    async def connect(self):
+        self.con = await asyncpg.connect(host=self.conf["host"], port=self.conf["port"], user=self.conf["username"], password=self.conf["password"], database=self.conf["database"])
+    async def execsql(self, query, *args):
+        values = await self.con.fetch(query, args)
+        return values
 def test():
     print("test")
 def userExists(uid):

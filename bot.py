@@ -3,14 +3,19 @@ import asyncio
 from discord.ext import commands
 import json
 import os
+import misc.database as database
 token = ""
+dblogin = {}
 prefix = ""
 bot = ""
 def loadConfig():
     global token
     global prefix
+    global dblogin
     with open("auth.config","r") as f:
-        token = json.load(f)["token"]
+        config = json.load(f)
+    token = config["token"]
+    dblogin = config["sql"]
     with open("bot.config","r") as f:
         prefix = json.load(f)["prefix"]
 def findAllCogs(fname):
@@ -25,15 +30,21 @@ def findAllCogs(fname):
         else:
             return []
 async def load():
+    db = database.db(dblogin)
+    await db.connect()
+    bot.assignDB(db)
     cogs = findAllCogs("cogs")
     print("{} cogs".format(len(cogs)))
     for cog in cogs:
         await bot.load_extension(cog)
     print("cogs loaded")
+class DBBOT(commands.Bot):
+    def assignDB(self, db):
+        self.db = db
 loadConfig()
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix=prefix, intents=intents)
+bot = DBBOT(command_prefix=prefix, intents=intents)
 asyncio.run(load())
 bot.run(token)
 @bot.event
