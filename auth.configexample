@@ -3,7 +3,7 @@
     "sql":{
         "host":"ip",
         "port":"port",
-        "username":"user",
+        "user":"user",
         "password":"pass",
         "database":"db"
     }

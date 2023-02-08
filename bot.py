@@ -3,7 +3,7 @@ import asyncio
 from discord.ext import commands
 import json
 import os
-import misc.database as database
+from misc import database,dblib
 token = ""
 dblogin = {}
 prefix = ""
@@ -31,8 +31,9 @@ def findAllCogs(fname):
             return []
 async def load():
     db = database.db(dblogin)
-    await db.connect()
+    db.connect()
     bot.assignDB(db)
+    bot.assignDBLIB(dblib.dba(db))
     cogs = findAllCogs("cogs")
     print("{} cogs".format(len(cogs)))
     for cog in cogs:
@@ -41,6 +42,8 @@ async def load():
 class DBBOT(commands.Bot):
     def assignDB(self, db):
         self.db = db
+    def assignDBLIB(self, dblib):
+        self.dblib = dblib
 loadConfig()
 intents = discord.Intents.default()
 intents.message_content = True
