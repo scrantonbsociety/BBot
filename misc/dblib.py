@@ -17,3 +17,10 @@ class dba:
             self.database.execsql(sql_query, str(uid), iid)
             return iid,True
         return iid,False
+    def unregister(self, uid):
+        iid = self.getUser(uid)
+        if iid!=None:
+            sql_query = 'DELETE FROM USERS WHERE id = %s'
+            self.database.execsql(sql_query, str(uid))
+            return True
+        return False

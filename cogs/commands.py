@@ -28,5 +28,12 @@ class Commands(commands.Cog):
             await ctx.send("Registered with iid {}".format(iid))
         else:
             await ctx.send("User already registered with iid {}".format(iid))
+    @commands.command()
+    async def deregister(self, ctx):
+        id = ctx.author.id
+        if self.dblib.unregister(id):
+            await ctx.send("User successfully unregistered")
+        else:
+            await ctx.send("User not registered")
 async def setup(bot):
     await bot.add_cog(Commands(bot,bot.db,bot.dblib))
