@@ -13,22 +13,20 @@ class Commands(commands.Cog):
         await ctx.send("Stopping bot")
         await ctx.bot.close()
     @commands.command()
-    async def info(self, ctx):
+    async def id(self, ctx):
         id = ctx.author.id
-        rslt = await self.dblib.userExists(id)
-        if rslt:
-            await ctx.send("User Does Exist")
+        rslt = self.dblib.getUser(id)
+        if rslt!=None:
+            await ctx.send("User IID is {}".format(rslt))
         else:
             await ctx.send("User Does Not Exist")
-    # @commands.command()
-    # async def register(self, ctx):
-    #     id = ctx.author.id
-    #     if database.userExists(id):
-    #         await ctx.send("You have already been registered")
-    #         return
-    #     if database.register(id):
-    #         await ctx.send("You have registered successfully")
-    #     else:
-    #         await ctx.send("Register Error")
+    @commands.command()
+    async def register(self, ctx):
+        id = ctx.author.id
+        iid, reg = self.dblib.register(id)
+        if reg:
+            await ctx.send("Registered with iid {}".format(iid))
+        else:
+            await ctx.send("User already registered with iid {}".format(iid))
 async def setup(bot):
     await bot.add_cog(Commands(bot,bot.db,bot.dblib))

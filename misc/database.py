@@ -14,7 +14,11 @@ class db:
         if ps_connection:
             ps_cursor = ps_connection.cursor()
             ps_cursor.execute(query,args)
-            records = ps_cursor.fetchall()
+            try:
+                records = ps_cursor.fetchall()
+            except:
+                records = []
+            ps_connection.commit()
             ps_cursor.close()
             self.pool.putconn(ps_connection)
         return records
