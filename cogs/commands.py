@@ -1,4 +1,5 @@
 from discord.ext import commands
+from misc.dblib import dba
 import discord
 class Commands(commands.Cog):
     def __init__(self, nbot, db, dblib):
@@ -36,4 +37,4 @@ class Commands(commands.Cog):
         else:
             await ctx.send("User not registered")
 async def setup(bot):
-    await bot.add_cog(Commands(bot,bot.db,bot.dblib))
+    await bot.add_cog(Commands(bot,bot.db,dba(bot.db)))
