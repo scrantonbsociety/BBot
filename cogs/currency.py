@@ -1,7 +1,7 @@
 import discord
 import json
 import random
-from misc import database
+from db import database
 from discord.ext import commands
 class Currency(commands.Cog):
     def __init__(self, nbot):

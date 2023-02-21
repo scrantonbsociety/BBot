@@ -1,5 +1,5 @@
 from discord.ext import commands
-from misc.dblib import dba
+from db.dblib import dba
 import discord
 class Commands(commands.Cog):
     def __init__(self, nbot, db, dblib):

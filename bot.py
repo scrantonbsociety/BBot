@@ -3,7 +3,7 @@ import asyncio
 from discord.ext import commands
 import json
 import os
-from misc import database
+from db import database
 token = ""
 dblogin = {}
 prefix = ""
