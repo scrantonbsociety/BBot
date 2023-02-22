@@ -33,7 +33,6 @@ async def load():
     db = database.db(dblogin)
     db.connect()
     bot.assignDB(db)
-    # bot.assignDBLIB(dblib.dba(db))
     cogs = findAllCogs("cogs")
     print("{} cogs".format(len(cogs)))
     for cog in cogs:
@@ -42,8 +41,6 @@ async def load():
 class DBBOT(commands.Bot):
     def assignDB(self, db):
         self.db = db
-    # def assignDBLIB(self, dblib):
-    #     self.dblib = dblib
 loadConfig()
 intents = discord.Intents.default()
 intents.message_content = True
