@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS "currency" (
+	"iid" VARCHAR(64) NOT NULL,
+	"cid" VARCHAR(64) NOT NULL,
+    "amnt" DECIMAL(32,2)
+);
