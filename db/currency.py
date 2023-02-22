@@ -12,13 +12,13 @@ class dbc:
         ps_connection = self.db.getconn()
         if ps_connection:
             ps_cursor = ps_connection.cursor()
-            q1 = "SELECT iid,cid,amnt FROM CURRENCY WHERE iid = %s AND cid = %s"
+            q1 = "SELECT (iid,cid,amnt) FROM CURRENCY WHERE iid = %s AND cid = %s"
             ps_cursor.execute(q1,(iid,cid))
             if ps_cursor.rowcount==0:
                 q2 = "INSERT INTO CURRENCY (iid,cid,amnt) VALUES (%s,%s,%s)"
                 ps_cursor.execute(q2,(iid,cid,amnt))
             else:
-                q3 = "UPDATE CURRENCY SET amnt = %s WHERE iid = %s AND cid = %s"
+                q3 = "UPDATE CURRENCY SET amnt = amnt + %s WHERE iid = %s AND cid = %s"
                 ps_cursor.execute(q3,(amnt,iid,cid))
             ps_connection.commit()
             ps_cursor.close()

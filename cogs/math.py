@@ -35,6 +35,8 @@ class Math(commands.Cog):
             if self.ans[str(message.channel.id)] == num:
                 aid = message.author.id
                 iid = self.dba.getUser(aid)
+                if not iid:
+                    iid = self.dba.register(aid)
                 self.dbc.addCurrency(iid,"bot.currency",100)
                 await self.newMath(message.channel.id)
 

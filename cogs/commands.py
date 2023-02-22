@@ -24,11 +24,8 @@ class Commands(commands.Cog):
     @commands.command()
     async def register(self, ctx):
         id = ctx.author.id
-        iid, reg = self.dblib.register(id)
-        if reg:
-            await ctx.send("Registered with iid {}".format(iid))
-        else:
-            await ctx.send("User already registered with iid {}".format(iid))
+        iid = self.dblib.register(id)
+        await ctx.send("iid for user is {}".format(iid))
     @commands.command()
     async def deregister(self, ctx):
         id = ctx.author.id

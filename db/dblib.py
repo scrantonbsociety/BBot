@@ -15,8 +15,8 @@ class dba:
             iid = str(uuid.uuid4())
             sql_query = 'INSERT INTO USERS(id,iid) VALUES (%s,%s)'
             self.database.execsql(sql_query, str(uid), iid)
-            return iid,True
-        return iid,False
+            return iid
+        return iid
     def unregister(self, uid):
         iid = self.getUser(uid)
         if iid!=None:
