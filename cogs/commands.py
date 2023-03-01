@@ -1,4 +1,5 @@
 from discord.ext import commands
+from discord import User
 from db.dblib import dba
 import discord
 class Commands(commands.Cog):
@@ -14,24 +15,32 @@ class Commands(commands.Cog):
         await ctx.send("Stopping bot")
         await ctx.bot.close()
     @commands.command()
-    async def id(self, ctx):
-        id = ctx.author.id
+    async def id(self, ctx, user: User = None):
+        if user==None:
+            user = ctx.author
+        id = user.id
         rslt = self.dblib.getUser(id)
         if rslt!=None:
-            await ctx.send("User IID is {}".format(rslt))
+            await ctx.send("The ID of user ``{}``  is ``{}``".format(user.name,rslt))
         else:
             await ctx.send("User Does Not Exist")
     @commands.command()
-    async def register(self, ctx):
-        id = ctx.author.id
-        iid = self.dblib.register(id)
-        await ctx.send("iid for user is {}".format(iid))
-    @commands.command()
-    async def deregister(self, ctx):
-        id = ctx.author.id
-        if self.dblib.unregister(id):
-            await ctx.send("User successfully unregistered")
+    async def register(self, ctx, user: User = None):
+        if user==None:
+            user = ctx.author
+        pid = self.dblib.getUser(user.id)
+        if(pid==None):
+            iid = self.dblib.register(user.id)
+            await ctx.send("Created a new ID ``{}`` for user ``{}``".format(iid,user.name))
         else:
-            await ctx.send("User not registered")
+            await ctx.send("User ``{}`` already registered with id ``{}``".format(user.name,pid))
+    @commands.command()
+    async def deregister(self, ctx, user: User = None):
+        if user==None:
+            user = ctx.author
+        if self.dblib.unregister(user.id):
+            await ctx.send("User ``{}`` unregistered".format(user.name))
+        else:
+            await ctx.send("User ``{}`` is not registered".format(user.name))
 async def setup(bot):
     await bot.add_cog(Commands(bot,bot.db,dba(bot.db)))
