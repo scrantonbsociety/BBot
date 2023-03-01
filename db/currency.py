@@ -9,6 +9,8 @@ class dbc:
         else:
             return rslt[0][2]
     def addCurrency(self,iid,cid,amnt):
+        if amnt<=0:
+            return False
         ps_connection = self.db.getconn()
         if ps_connection:
             ps_cursor = ps_connection.cursor()
@@ -23,3 +25,20 @@ class dbc:
             ps_connection.commit()
             ps_cursor.close()
             self.db.putconn(ps_connection)
+        return True
+    def deductCurrency(self,iid,cid,amnt):
+        if amnt<=0:
+            return False
+        ps_connection = self.db.getconn()
+        if ps_connection:
+            ps_cursor = ps_connection.cursor()
+            q1 = "UPDATE CURRENCY SET amnt = amnt - %s WHERE iid = %s AND cid = %s AND amnt >= %s"
+            ps_cursor.execute(q1,(amnt,iid,cid,amnt))
+            if ps_cursor.rowcount==0:
+                rslt = False
+            else:
+                rslt = True
+            ps_cursor.close()
+            ps_connection.commit()
+            self.db.putconn(ps_connection)
+        return rslt
