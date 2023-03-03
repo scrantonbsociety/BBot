@@ -1,39 +1,38 @@
 from discord.ext import commands
 from discord import User
 from db.currency import dbc
-from db.dblib import dba
+from db.user import dba
 import decimal
 class Currency(commands.Cog):
-    def __init__(self, nbot, dbc, dba):
+    def __init__(self, nbot, dbapi):
         self.bot = nbot
-        self.dbc = dbc
-        self.dba = dba
+        self.dbapi = dbapi
     @commands.command()
     async def bal(self, ctx, user: User = None):
         if user!=None:
-            iid = self.dba.getUser(user.id)
+            iid = self.dbapi.user.getUser(user.id)
         else:
-            iid = self.dba.getUser(ctx.author.id)
+            iid = self.dbapi.user.getUser(ctx.author.id)
         if iid!=None:
-            rslt = self.dbc.checkBal(iid,"bot.currency")
+            rslt = self.dbapi.currency.checkBal(iid,"bot.currency")
         else:
             rslt = 0
         await ctx.send(rslt)
     @commands.command()
     async def pay(self, ctx, user: User, amnt: float):
-        iid = self.dba.getUser(ctx.author.id)
-        diid = self.dba.getUser(user.id)
+        iid = self.dbapi.user.getUser(ctx.author.id)
+        diid = self.dbapi.user.getUser(user.id)
         if diid==None:
-            diid = self.dba.register(user.id)
+            diid = self.dbapi.user.register(user.id)
         if iid==None:
             await ctx.send("User Not Registered")
         amount = round(amnt,2)
-        if self.dbc.deductCurrency(iid,"bot.currency",amount):
-            self.dbc.addCurrency(diid,"bot.currency",amount)
+        if self.dbapi.currency.deductCurrency(iid,"bot.currency",amount):
+            self.dbapi.currency.addCurrency(diid,"bot.currency",amount)
             await ctx.send("currency transfer successful")
         else:
             await ctx.send("currency transfer failed")
         
 
 async def setup(bot):
-    await bot.add_cog(Currency(bot,dbc(bot.db),dba(bot.db)))
+    await bot.add_cog(Currency(bot,bot.dbapi))

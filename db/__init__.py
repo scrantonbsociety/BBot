@@ -1,1 +1,1 @@
-# Used to make lib a package
+# makes db a library

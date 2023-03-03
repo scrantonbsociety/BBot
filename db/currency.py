@@ -42,3 +42,5 @@ class dbc:
             ps_connection.commit()
             self.db.putconn(ps_connection)
         return rslt
+def getAPI(dbobj):
+    return dbc(dbobj)

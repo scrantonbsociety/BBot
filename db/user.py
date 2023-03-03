@@ -24,3 +24,5 @@ class dba:
             self.database.execsql(sql_query, str(uid))
             return True
         return False
+def getAPI(dbobj):
+    return dba(dbobj)

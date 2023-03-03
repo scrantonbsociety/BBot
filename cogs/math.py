@@ -3,14 +3,13 @@ import json
 import random
 from db import database
 from discord.ext import commands
-from db.dblib import dba
-from db.currency import dbc
+# from db.userlib import dba
+# from db.currency import dbc
 class Math(commands.Cog):
-    def __init__(self, nbot,dba,dbc):
+    def __init__(self, nbot,dbapi):
         self.bot = nbot
         self.ans = {}
-        self.dba = dba
-        self.dbc = dbc
+        self.dbapi = dbapi
     async def newMath(self, channel):
         num0 = random.randint(3,12)
         num1 = random.randint(3,12)
@@ -34,11 +33,11 @@ class Math(commands.Cog):
                 return
             if self.ans[str(message.channel.id)] == num:
                 aid = message.author.id
-                iid = self.dba.getUser(aid)
+                iid = self.dbapi.user.getUser(aid)
                 if not iid:
-                    iid = self.dba.register(aid)
-                self.dbc.addCurrency(iid,"bot.currency",100)
+                    iid = self.dbapi.user.register(aid)
+                self.dbapi.currency.addCurrency(iid,"bot.currency",100)
                 await self.newMath(message.channel.id)
 
 async def setup(bot):
-    await bot.add_cog(Math(bot,dba(bot.db),dbc(bot.db)))
+    await bot.add_cog(Math(bot,bot.dbapi))
