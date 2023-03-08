@@ -1,14 +1,14 @@
 class dbc:
     def __init__(self,dba):
         self.db = dba
-    def checkBal(self,iid,cid):
+    def bal(self,iid,cid):
         sql_query = "SELECT iid,cid,amnt FROM CURRENCY WHERE iid = %s AND cid = %s"
         rslt = self.db.execsql(sql_query,iid,cid)
         if len(rslt)==0:
             return 0
         else:
             return rslt[0][2]
-    def addCurrency(self,iid,cid,amnt):
+    def add(self,iid,cid,amnt):
         if amnt<=0:
             return False
         ps_connection = self.db.getconn()
@@ -26,7 +26,7 @@ class dbc:
             ps_cursor.close()
             self.db.putconn(ps_connection)
         return True
-    def deductCurrency(self,iid,cid,amnt):
+    def deduct(self,iid,cid,amnt):
         if amnt<=0:
             return False
         ps_connection = self.db.getconn()

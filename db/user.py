@@ -2,7 +2,7 @@ import uuid
 class dba:
     def __init__(self, db):
         self.database = db
-    def getUser(self, uid):
+    def get(self, uid):
         sql_query = 'SELECT id,iid FROM USERS where id = %s'
         rslt = self.database.execsql(sql_query, str(uid))
         if len(rslt)==0:

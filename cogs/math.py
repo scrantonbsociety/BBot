@@ -33,10 +33,10 @@ class Math(commands.Cog):
                 return
             if self.ans[str(message.channel.id)] == num:
                 aid = message.author.id
-                iid = self.dbapi.user.getUser(aid)
+                iid = self.dbapi.user.get(aid)
                 if not iid:
                     iid = self.dbapi.user.register(aid)
-                self.dbapi.currency.addCurrency(iid,"bot.currency",100)
+                self.dbapi.currency.add(iid,"bot.currency",100)
                 await self.newMath(message.channel.id)
 
 async def setup(bot):

@@ -18,7 +18,7 @@ class Commands(commands.Cog):
         if user==None:
             user = ctx.author
         id = user.id
-        rslt = self.dbapi.user.getUser(id)
+        rslt = self.dbapi.user.get(id)
         if rslt!=None:
             await ctx.send("The ID of user ``{}``  is ``{}``".format(user.name,rslt))
         else:
@@ -27,7 +27,7 @@ class Commands(commands.Cog):
     async def register(self, ctx, user: User = None):
         if user==None:
             user = ctx.author
-        pid = self.dbapi.user.getUser(user.id)
+        pid = self.dbapi.user.get(user.id)
         if(pid==None):
             iid = self.dbapi.user.register(user.id)
             await ctx.send("Created a new ID ``{}`` for user ``{}``".format(iid,user.name))
