@@ -8,17 +8,20 @@ from db import database
 token = ""
 dblogin = {}
 prefix = ""
+configLoad = []
 bot = ""
 def loadConfig():
     global token
     global prefix
     global dblogin
+    global configLoad
     with open("auth.config","r") as f:
         config = json.load(f)
     token = config["token"]
     dblogin = config["sql"]
     with open("bot.config","r") as f:
-        prefix = json.load(f)["prefix"]
+        configLoad = json.load(f)
+        prefix = configLoad["prefix"]
 def findAllCogs(fname):
     clist = []
     if os.path.isdir(fname):
@@ -35,6 +38,7 @@ async def load():
     db.connect()
     bot.assignDB(db)
     bot.assignDBAPI(dbapi.dbint(db))
+    bot.assignConfig(configLoad)
     cogs = findAllCogs("cogs")
     print("{} cogs".format(len(cogs)))
     for cog in cogs:
@@ -45,6 +49,8 @@ class DBBOT(commands.Bot):
         self.db = db
     def assignDBAPI(self,dbapi):
         self.dbapi = dbapi
+    def assignConfig(self,config):
+        self.config = config
 loadConfig()
 intents = discord.Intents.default()
 intents.message_content = True
