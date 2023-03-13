@@ -131,4 +131,4 @@ dmypy.json
 # Config files used in bot
 *.config
 
-docker/
+postgres/
