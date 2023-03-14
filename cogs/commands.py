@@ -1,5 +1,6 @@
 from discord.ext import commands
 from discord import User
+from discord import app_commands
 # from db.userlib import dba
 import discord
 class Commands(commands.Cog):
@@ -41,5 +42,15 @@ class Commands(commands.Cog):
             await ctx.send("User ``{}`` unregistered".format(user.name))
         else:
             await ctx.send("User ``{}`` is not registered".format(user.name))
+    @commands.command()
+    async def sync(self, ctx):
+        if ctx.author.id in self.bot.config["owners"]:
+            await self.bot.tree.sync()
+            await ctx.send("Sync updated commands to the client")
+        else:
+            await ctx.send("You are not authorized to run this cmd")
+    @app_commands.command()
+    async def slash(self, interaction: discord.Integration):
+        await interaction.response.send_message("slash command test")
 async def setup(bot):
     await bot.add_cog(Commands(bot,bot.dbapi))

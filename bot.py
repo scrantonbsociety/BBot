@@ -1,24 +1,28 @@
 import discord
 import asyncio
 from discord.ext import commands
+from discord import app_commands
 import json
 import os
 from db import dbapi
-from db import database
+from db import database 
 token = ""
 dblogin = {}
 prefix = ""
 bot = ""
+globalconfig = {}
 def loadConfig():
     global token
     global prefix
     global dblogin
+    global globalconfig
     with open("auth.config","r") as f:
         config = json.load(f)
     token = config["token"]
     dblogin = config["sql"]
     with open("bot.config","r") as f:
-        prefix = json.load(f)["prefix"]
+        globalconfig = json.load(f)
+    prefix = globalconfig["prefix"]
 def findAllCogs(fname):
     clist = []
     if os.path.isdir(fname):
@@ -35,6 +39,7 @@ async def load():
     db.connect()
     bot.assignDB(db)
     bot.assignDBAPI(dbapi.dbint(db))
+    bot.assignConfig(globalconfig)
     cogs = findAllCogs("cogs")
     print("{} cogs".format(len(cogs)))
     for cog in cogs:
@@ -43,6 +48,8 @@ async def load():
 class DBBOT(commands.Bot):
     def assignDB(self, db):
         self.db = db
+    def assignConfig(self, config):
+        self.config = config
     def assignDBAPI(self,dbapi):
         self.dbapi = dbapi
 loadConfig()
