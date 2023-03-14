@@ -7,41 +7,41 @@ class Commands(commands.Cog):
     def __init__(self, nbot, dbapi):
         self.bot = nbot
         self.dbapi = dbapi
-    @commands.command()
-    async def ping(self, ctx):
-        await ctx.send("Pong!!")
-    @commands.command()
-    async def stop(self, ctx):
-        await ctx.send("Stopping bot")
-        await ctx.bot.close()
-    @commands.command()
-    async def id(self, ctx, user: User = None):
+    @app_commands.command()
+    async def ping(self, interaction: discord.Integration):
+        await interaction.response.send_message("Pong!!")
+    @app_commands.command()
+    async def stop(self, interaction: discord.Integration):
+        await interaction.response.send_message("Stopping bot")
+        await self.bot.close()
+    @app_commands.command()
+    async def id(self, interaction: discord.Integration, user: User = None):
         if user==None:
-            user = ctx.author
+            user = interaction.user
         id = user.id
         rslt = self.dbapi.user.get(id)
         if rslt!=None:
-            await ctx.send("The ID of user ``{}``  is ``{}``".format(user.name,rslt))
+            await interaction.response.send_message("The ID of user ``{}``  is ``{}``".format(user.name,rslt))
         else:
-            await ctx.send("User Does Not Exist")
-    @commands.command()
-    async def register(self, ctx, user: User = None):
+            await interaction.response.send_message("User Does Not Exist")
+    @app_commands.command()
+    async def register(self, interaction: discord.Integration, user: User = None):
         if user==None:
-            user = ctx.author
+            user = interaction.user
         pid = self.dbapi.user.get(user.id)
         if(pid==None):
             iid = self.dbapi.user.register(user.id)
-            await ctx.send("Created a new ID ``{}`` for user ``{}``".format(iid,user.name))
+            await interaction.response.send_message("Created a new ID ``{}`` for user ``{}``".format(iid,user.name))
         else:
-            await ctx.send("User ``{}`` already registered with id ``{}``".format(user.name,pid))
-    @commands.command()
-    async def deregister(self, ctx, user: User = None):
+            await interaction.response.send_message("User ``{}`` already registered with id ``{}``".format(user.name,pid))
+    @app_commands.command()
+    async def deregister(self, interaction: discord.Integration, user: User = None):
         if user==None:
-            user = ctx.author
+            user = interaction.user
         if self.dbapi.user.unregister(user.id):
-            await ctx.send("User ``{}`` unregistered".format(user.name))
+            await interaction.response.send_message("User ``{}`` unregistered".format(user.name))
         else:
-            await ctx.send("User ``{}`` is not registered".format(user.name))
+            await interaction.response.send_message("User ``{}`` is not registered".format(user.name))
     @commands.command()
     async def forcesync(self, ctx):
         if ctx.author.id in self.bot.config["owners"]:
