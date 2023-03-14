@@ -43,12 +43,20 @@ class Commands(commands.Cog):
         else:
             await ctx.send("User ``{}`` is not registered".format(user.name))
     @commands.command()
-    async def sync(self, ctx):
+    async def forcesync(self, ctx):
         if ctx.author.id in self.bot.config["owners"]:
             await self.bot.tree.sync()
             await ctx.send("Sync updated commands to the client")
         else:
             await ctx.send("You are not authorized to run this cmd")
+    @app_commands.command()
+    async def sync(self, interaction: discord.Integration):
+        if interaction.user.id in self.bot.config["owners"]:
+            await self.bot.tree.sync()
+            await interaction.response.send_message("Sync updated commands to the client")
+        else:
+            await interaction.response.send_message("You are not authorized to run this cmd")
+
     @app_commands.command()
     async def slash(self, interaction: discord.Integration):
         await interaction.response.send_message("slash command test")
