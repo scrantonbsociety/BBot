@@ -130,3 +130,5 @@ dmypy.json
 
 # Config files used in bot
 *.config
+
+postgres/
