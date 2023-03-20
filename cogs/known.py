@@ -33,7 +33,7 @@ class Known(commands.Cog):
             for name in names:
                 listOfNames+=name + "\n"
             listOfNames = listOfNames[:-1]
-            await interaction.response.send_message("The following names were found for the internal id ``{}`` ```{}```".format(iid, listOfNames))    
+            await interaction.response.send_message("The following names were found for the internal id ``{}`` ```\n{}```".format(iid, listOfNames))    
 
 async def setup(bot):
     await bot.add_cog(Known(bot,bot.dbapi))
