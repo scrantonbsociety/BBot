@@ -8,40 +8,40 @@ class Commands(commands.Cog):
         self.bot = nbot
         self.dbapi = dbapi
     @app_commands.command()
-    async def ping(self, interaction: discord.Integration):
-        await interaction.response.send_message("Pong!!")
+    async def ping(self, integration: discord.Integration):
+        await integration.response.send_message("Pong!!")
     @app_commands.command()
-    async def stop(self, interaction: discord.Integration):
-        await interaction.response.send_message("Stopping bot")
+    async def stop(self, integration: discord.Integration):
+        await integration.response.send_message("Stopping bot")
         await self.bot.close()
     @app_commands.command()
-    async def id(self, interaction: discord.Integration, user: User = None):
+    async def id(self, integration: discord.Integration, user: User = None):
         if user==None:
-            user = interaction.user
+            user = integration.user
         id = user.id
         rslt = self.dbapi.user.get(id)
         if rslt!=None:
-            await interaction.response.send_message("The ID of user ``{}``  is ``{}``".format(user.name,rslt))
+            await integration.response.send_message("The ID of user ``{}``  is ``{}``".format(user.name,rslt))
         else:
-            await interaction.response.send_message("User Does Not Exist")
+            await integration.response.send_message("User Does Not Exist")
     @app_commands.command()
-    async def register(self, interaction: discord.Integration, user: User = None):
+    async def register(self, integration: discord.Integration, user: User = None):
         if user==None:
-            user = interaction.user
+            user = integration.user
         pid = self.dbapi.user.get(user.id)
         if(pid==None):
             iid = self.dbapi.user.register(user.id)
-            await interaction.response.send_message("Created a new ID ``{}`` for user ``{}``".format(iid,user.name))
+            await integration.response.send_message("Created a new ID ``{}`` for user ``{}``".format(iid,user.name))
         else:
-            await interaction.response.send_message("User ``{}`` already registered with id ``{}``".format(user.name,pid))
+            await integration.response.send_message("User ``{}`` already registered with id ``{}``".format(user.name,pid))
     @app_commands.command()
-    async def deregister(self, interaction: discord.Integration, user: User = None):
+    async def deregister(self, integration: discord.Integration, user: User = None):
         if user==None:
-            user = interaction.user
+            user = integration.user
         if self.dbapi.user.unregister(user.id):
-            await interaction.response.send_message("User ``{}`` unregistered".format(user.name))
+            await integration.response.send_message("User ``{}`` unregistered".format(user.name))
         else:
-            await interaction.response.send_message("User ``{}`` is not registered".format(user.name))
+            await integration.response.send_message("User ``{}`` is not registered".format(user.name))
     @commands.command()
     async def forcesync(self, ctx):
         if ctx.author.id in self.bot.config["owners"]:
@@ -50,15 +50,15 @@ class Commands(commands.Cog):
         else:
             await ctx.send("You are not authorized to run this cmd")
     @app_commands.command()
-    async def sync(self, interaction: discord.Integration):
-        if interaction.user.id in self.bot.config["owners"]:
+    async def sync(self, integration: discord.Integration):
+        if integration.user.id in self.bot.config["owners"]:
             await self.bot.tree.sync()
-            await interaction.response.send_message("Sync updated commands to the client")
+            await integration.response.send_message("Sync updated commands to the client")
         else:
-            await interaction.response.send_message("You are not authorized to run this cmd")
+            await integration.response.send_message("You are not authorized to run this cmd")
 
     @app_commands.command()
-    async def slash(self, interaction: discord.Integration):
-        await interaction.response.send_message("slash command test")
+    async def slash(self, integration: discord.Integration):
+        await integration.response.send_message("slash command test")
 async def setup(bot):
     await bot.add_cog(Commands(bot,bot.dbapi))
