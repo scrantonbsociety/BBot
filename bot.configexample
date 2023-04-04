@@ -2,5 +2,8 @@
     "prefix":"/",
     "workChannels":[
         1234
+    ],
+    "owners":[
+        1234
     ]
 }
