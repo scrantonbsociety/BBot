@@ -7,9 +7,9 @@ class Known(commands.Cog):
         self.bot = nbot
         self.dbapi = dbapi
     @app_commands.command()
-    async def knownas(self, integration: discord.Integration, title: str, type: str, iid: str):
+    async def knownas(self, integration: discord.Integration, title: str, iid: str):
         if integration.user.id in self.bot.config["owners"]:
-            rslt = self.dbapi.known.add(title,type,iid)
+            rslt = self.dbapi.known.add(title,iid,integration.user.id)
             if rslt != iid:
                 await integration.response.send_message("Something went wrong with the known as")
             else:
@@ -24,8 +24,8 @@ class Known(commands.Cog):
         else:
             await integration.response.send_message("name ``{}`` is known as ``{}``".format(title, name))
     @app_commands.command()
-    async def names(self, integration: discord.Integration, iid: str, type: str):
-        names = self.dbapi.known.lookupnames(iid,type)
+    async def names(self, integration: discord.Integration, iid: str):
+        names = self.dbapi.known.lookupnames(iid)
         if len(names)==0:
             await integration.response.send_message("internal id ``{}`` not found in db".format(iid))
         else:
