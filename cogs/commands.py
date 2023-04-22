@@ -53,7 +53,7 @@ class Commands(commands.Cog):
     async def sync(self, integration: discord.Integration):
         if integration.user.id in self.bot.config["owners"]:
             await self.bot.tree.sync()
-            await integration.response.send_message("Sync updated commands to the client")
+            await integration.response.send_message("Sync updated commands to the client. Press ctrl+R!")
         else:
             await integration.response.send_message("You are not authorized to run this cmd")
 
