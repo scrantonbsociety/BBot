@@ -1,10 +1,6 @@
-import discord
 import json
 import random
-from db import database
 from discord.ext import commands
-# from db.userlib import dba
-# from db.currency import dbc
 class Math(commands.Cog):
     def __init__(self, nbot,dbapi):
         self.bot = nbot

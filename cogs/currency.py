@@ -2,9 +2,6 @@ import discord
 from discord.ext import commands
 from discord import User
 from discord import app_commands
-from db.currency import dbc
-from db.user import dba
-import decimal
 import random
 class Currency(commands.Cog):
     def __init__(self, nbot, dbapi):

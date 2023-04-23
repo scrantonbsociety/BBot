@@ -1,9 +1,6 @@
 import discord
 from discord.ext import commands
 from discord import app_commands
-from db.currency import dbc
-from db.user import dba
-import decimal
 class Gatekeeper(commands.Cog):
     def __init__(self, nbot, dbapi):
         self.bot = nbot
