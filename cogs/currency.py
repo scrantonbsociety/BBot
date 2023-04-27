@@ -7,31 +7,31 @@ class Currency(commands.Cog):
     def __init__(self, nbot, dbapi):
         self.bot = nbot
         self.dbapi = dbapi
-    @commands.command()
-    async def bal(self, ctx, user: User = None):
+    @app_commands.command()
+    async def bal(self, integration: discord.Integration, user: User = None):
         if user!=None:
             iid = self.dbapi.user.get(user.id)
         else:
-            iid = self.dbapi.user.get(ctx.author.id)
+            iid = self.dbapi.user.get(integration.user.id)
         if iid!=None:
             rslt = self.dbapi.currency.bal(iid,"bot.currency")
         else:
             rslt = 0
-        await ctx.send(rslt)
-    @commands.command()
-    async def pay(self, ctx, user: User, amnt: float):
-        iid = self.dbapi.user.get(ctx.author.id)
+        await integration.response.send_message(rslt)
+    @app_commands.command()
+    async def pay(self, integration: discord.Integration, user: User, amnt: float):
+        iid = self.dbapi.user.get(integration.user.id)
         diid = self.dbapi.user.get(user.id)
         if diid==None:
             diid = self.dbapi.user.register(user.id)
         if iid==None:
-            await ctx.send("User Not Registered")
+            await integration.response.send_message("User Not Registered")
         amount = round(amnt,2)
         if self.dbapi.currency.deduct(iid,"bot.currency",amount):
             self.dbapi.currency.add(diid,"bot.currency",amount)
-            await ctx.send("currency transfer successful")
+            await integration.response.send_message("currency transfer successful")
         else:
-            await ctx.send("currency transfer failed")
+            await integration.response.send_message("currency transfer failed")
     @app_commands.command()
     async def bf(self, integration: discord.Integration, amnt: float, call: str):
         # Future suggestions:
