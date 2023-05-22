@@ -1,7 +1,6 @@
 from discord.ext import commands
 from discord import User
 from discord import app_commands
-# from db.userlib import dba
 import discord
 class Commands(commands.Cog):
     def __init__(self, nbot, dbapi):
