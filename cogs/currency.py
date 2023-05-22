@@ -46,7 +46,8 @@ class Currency(commands.Cog):
         if self.dbapi.currency.deduct(iid,"bot.currency", amount):
             side = random.randint(0, 1) #flips the coin, 0 = heads - 1 = tails
         else:
-            await integration.response.send_message("No money to bet!")
+            await integration.response.send_message("Not enough money to bet!")
+            return None
         if 'h' in call.lower():
             call = '0'
         else:
@@ -56,6 +57,114 @@ class Currency(commands.Cog):
             self.dbapi.currency.add(iid,"bot.currency",amount*2)
         else:
             await integration.response.send_message("Sorry! You lost your money.")
+"""     @app_commands.command()
+    async def bj(self, integration: discord.Integration, wager: float):
+        user = integration.user
+        iid = self.dbapi.user.get(user.id)
+        if not self.dbapi.currency.deduct(iid,"bot.currency", wager):
+            await integration.response.send_message("Not enough money to bet!")
+            return None
+        # This function follows the established naming convention, and there's no changing it
+        cards = ['aceOfSpades', 'twoOfSpades', 'threeOfSpades', 'fourOfSpades', 'fiveOfSpades', 'sixOfSpades', 'sevenOfSpades', 'eightOfSpades', 'nineOfSpades', 'tenOfSpades', 'jackOfSpades', 'queenOfSpades', 'kingOfSpades'
+                 'aceOfDiamonds', 'twoOfDiamonds', 'threeOfDiamonds', 'fourOfDiamonds', 'fiveOfDiamonds', 'sixOfDiamonds', 'sevenOfDiamonds', 'eightOfDiamonds', 'nineOfDiamonds', 'tenOfDiamonds', 'jackOfDiamonds', 'queenOfDiamonds', 'kingOfDiamonds'
+                 'aceOfClubs', 'twoOfClubs', 'threeOfClubs', 'fourOfClubs', 'fiveOfClubs', 'sixOfClubs', 'sevenOfClubs', 'eightOfClubs', 'nineOfClubs', 'tenOfClubs', 'jackOfClubs', 'queenOfClubs', 'kingOfClubs'
+                 'aceOfHearts', 'twoOfHearts', 'threeOfHearts', 'fourOfHearts', 'fiveOfHearts', 'sixOfHearts', 'sevenOfHearts', 'eightOfHearts', 'nineOfHearts', 'tenOfHearts', 'jackOfHearts', 'queenOfHearts', 'kingOfHearts']
+        dealerDeck = [cards.pop(random.randint(0, len(cards))), cards.pop(random.randint(0, len(cards)))]
+        playerDeck = [cards.pop(random.randint(0, len(cards))), cards.pop(random.randint(0, len(cards)))]
+
+        # This method does not work for the case: A 5 5 A
+        # As it would return 22 instead of 12
+        def evaluateAces(deck, total):
+            aceValue = 11 
+            for card in deck:
+                if 'ace' in card:
+                    # If the total goes over 21, hard set the value of aces to 1 and reevaluate.
+                    if total + 11 > 21:
+                        aceValue = 1
+                    total += aceValue
+            return total
+
+        def getDeckSum(deck):
+            sum = 0
+            for card in deck:
+                if 'two' in card:
+                    sum += 2
+                elif 'three' in card:
+                    sum += 3
+                elif 'four' in card:
+                    sum += 4
+                elif 'five' in card:
+                    sum += 5
+                elif 'six' in card:
+                    sum += 6
+                elif 'seven' in card:
+                    sum += 7
+                elif 'eight' in card:
+                    sum += 8
+                elif 'nine' in card:
+                    sum += 9
+                elif 'ten' in card or 'jack' in card or 'queen' in card or 'king' in card:
+                    sum += 10
+            sum = evaluateAces(deck, sum)
+            return sum
+
+        # Three scenarios:
+        # Dealer has natural - Game ends immediately and bet is collected
+        # Player has natural - Game ends immediately and bet and a half is paid back
+        # Both dealer and player has natural - Game ends immediately and bet is paid back
+
+        dealerTotal = getDeckSum(dealerDeck)
+        playerTotal = getDeckSum(playerDeck)
+
+        # Need to make sure the dealer only checks for blackjack if a 10-value card is the up card
+        # If the up card is an ace, offer insurance
+        if dealerTotal == 21 and playerTotal == 21:
+            await integration.response.send_message("We both have blackjack! Game over.")
+            self.dbapi.currency.add(iid,"bot.currency", wager)
+            return None
+        elif dealerTotal == 21 and playerTotal != 21:
+            await integration.response.send_message("Dealer has blackjack! Thanks for playing!")
+            return None
+        elif dealerTotal != 21 and playerTotal == 21:
+            await integration.response.send_message("Congratulations! You have blackjack!")
+            self.dbapi.currency.add(iid,"bot.currency", wager * 1.5)
+            return None
+        
+        def displayDeck(deck):
+            response = "Your cards:\n"
+            for card in deck:
+                response += card + "\n"
+            return response
+        
+        await integration.response.send_message("Your cards:\n{}\n{}\nDealer has {}, do you hit or stay?".format(playerDeck[0], playerDeck[1], dealerDeck[0]))
+        
+        hit = client.get_emoji('U+1F44D')
+            stay = client.get_emoji()
+        doubleDown = client.get_emoji()
+        split = client.get_emoji()
+        insurance = client.get_emoji()
+
+        if 'cards' in message.content:
+            
+
+        # Retrieve input from the player to hit or stay
+
+        inPlay = True
+        while inPlay:
+            await integration.response.send_message(displayDeck(playerDeck) + "\nDo you hit or stay?")
+            if True: # Player choses to hit
+                # Order is imporant because it is true to the game
+                playerDeck.append(cards.pop(random.randint(0, len(cards))))
+                playerTotal = getDeckSum(playerDeck)
+                if playerTotal == 21:
+                    await integration.response.send_message("You drew a {}! Blackjack! Congratulations!".format(playerDeck[len(playerDeck-1)]))
+
+                    return None
+                elif playerTotal > 21:
+                    await integration.response.send_message("You drew a {}! You've gone bust! Thank you for playing.".format(playerDeck[len(playerDeck-1)]))
+                    return None
+        # When the player stands, repeat this process for the dealer and program corresonding outcomes """
+
 
 async def setup(bot):
     await bot.add_cog(Currency(bot,bot.dbapi))
