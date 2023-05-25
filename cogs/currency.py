@@ -33,42 +33,46 @@ class Currency(commands.Cog):
         else:
             await integration.response.send_message("currency transfer failed")
     @app_commands.command()
-    async def bf(self, integration: discord.Integration, amnt: float, call: str):
+    @app_commands.choices(call=[
+        app_commands.Choice(name="Heads", value=True),
+        app_commands.Choice(name="Tails", value=False)
+    ])
+    async def bf(self, integration: discord.Integration, amnt: float, call: app_commands.Choice[int]):
         # Future suggestions:
         # Make Discord suggest to the user the only available options they can input
         # Yell at the user for putting in anything else
         user = integration.user # Refers to Discord's user object
         iid = self.dbapi.user.get(user.id) #Gets internal id of the user from our db
+        message = "You called " + str(call.value) + "!\n" # message to be sent after flip
         amount = round(amnt, 2) #Rounds the amount correctly
         if self.dbapi.currency.deduct(iid,"bot.currency", amount):
             side = random.randint(0, 1) #flips the coin, 0 = heads - 1 = tails
         else:
             await integration.response.send_message("Not enough money to bet!")
             return None
-        if 'h' in call.lower():
-            call = '0'
-        else:
-            call = '1'
-        if side == int(call):
-            await integration.response.send_message("Congratulations! You won {}".format(amount*2))
+        result = True if side == 0 else False
+        message += "The coin landed on " + str(result) + "!\n"
+        if call.value == result:
+            message += "Congratulations! You won {}".format(amount*2)
             self.dbapi.currency.add(iid,"bot.currency",amount*2)
         else:
-            await integration.response.send_message("Sorry! You lost your money.")
-"""     @app_commands.command()
+            message += "Sorry! You lost your money."
+        await integration.response.send_message(message)
+    @app_commands.command()
     async def bj(self, integration: discord.Integration, wager: float):
+        # This function follows the established naming convention, and there's no changing it
         user = integration.user
         iid = self.dbapi.user.get(user.id)
         if not self.dbapi.currency.deduct(iid,"bot.currency", wager):
             await integration.response.send_message("Not enough money to bet!")
             return None
-        # This function follows the established naming convention, and there's no changing it
+        # One deck of cards is used for simplicity (for now)
         cards = ['aceOfSpades', 'twoOfSpades', 'threeOfSpades', 'fourOfSpades', 'fiveOfSpades', 'sixOfSpades', 'sevenOfSpades', 'eightOfSpades', 'nineOfSpades', 'tenOfSpades', 'jackOfSpades', 'queenOfSpades', 'kingOfSpades'
                  'aceOfDiamonds', 'twoOfDiamonds', 'threeOfDiamonds', 'fourOfDiamonds', 'fiveOfDiamonds', 'sixOfDiamonds', 'sevenOfDiamonds', 'eightOfDiamonds', 'nineOfDiamonds', 'tenOfDiamonds', 'jackOfDiamonds', 'queenOfDiamonds', 'kingOfDiamonds'
                  'aceOfClubs', 'twoOfClubs', 'threeOfClubs', 'fourOfClubs', 'fiveOfClubs', 'sixOfClubs', 'sevenOfClubs', 'eightOfClubs', 'nineOfClubs', 'tenOfClubs', 'jackOfClubs', 'queenOfClubs', 'kingOfClubs'
                  'aceOfHearts', 'twoOfHearts', 'threeOfHearts', 'fourOfHearts', 'fiveOfHearts', 'sixOfHearts', 'sevenOfHearts', 'eightOfHearts', 'nineOfHearts', 'tenOfHearts', 'jackOfHearts', 'queenOfHearts', 'kingOfHearts']
         dealerDeck = [cards.pop(random.randint(0, len(cards))), cards.pop(random.randint(0, len(cards)))]
         playerDeck = [cards.pop(random.randint(0, len(cards))), cards.pop(random.randint(0, len(cards)))]
-
         # This method does not work for the case: A 5 5 A
         # As it would return 22 instead of 12
         def evaluateAces(deck, total):
@@ -133,20 +137,27 @@ class Currency(commands.Cog):
                 response += card + "\n"
             return response
         
-        await integration.response.send_message("Your cards:\n{}\n{}\nDealer has {}, do you hit or stay?".format(playerDeck[0], playerDeck[1], dealerDeck[0]))
-        
-        hit = client.get_emoji('U+1F44D')
-            stay = client.get_emoji()
-        doubleDown = client.get_emoji()
-        split = client.get_emoji()
-        insurance = client.get_emoji()
+        options = ["🃏", "🛑", "⏬"]
 
-        if 'cards' in message.content:
-            
+        # Evaluate if the cards have same face value, present option to split if true
+        firstMessage = f"{displayDeck(playerDeck)}Total: {playerTotal}\nDealer has {dealerDeck[0]} facing up\nDo you hit, stay, double down or surrender?"
+        if playerDeck[0][0:playerDeck[0].index("Of")] == playerDeck[1][0:playerDeck[1].index("Of")]:
+            options.append("🍌")
+            firstMessage = firstMessage[0:firstMessage.index("or")-1] + ", split," + firstMessage[firstMessage.index("or"):]
+        
+        options.append("🏳️")
+        await integration.channel.send(firstMessage)
+        # Should fix bug where first reaction would go on 2nd to last message
+        firstMessageObject = integration.channel.last_message
+
+        for option in options:
+            await firstMessageObject.add_reaction(option)
+
+        rxn = await integration.on_reaction_add("🃏", user)
+        await integration.channel.send(f"You reacted with {rxn}")
 
         # Retrieve input from the player to hit or stay
-
-        inPlay = True
+        """ inPlay = True
         while inPlay:
             await integration.response.send_message(displayDeck(playerDeck) + "\nDo you hit or stay?")
             if True: # Player choses to hit
@@ -159,8 +170,8 @@ class Currency(commands.Cog):
                     return None
                 elif playerTotal > 21:
                     await integration.response.send_message("You drew a {}! You've gone bust! Thank you for playing.".format(playerDeck[len(playerDeck-1)]))
-                    return None
-        # When the player stands, repeat this process for the dealer and program corresonding outcomes """
+                    return None """
+        # When the player stands, repeat this process for the dealer and program corresonding outcomes
 
 
 async def setup(bot):
