@@ -7,12 +7,6 @@ from helper_functions import getLoginStatus
 import hashlib
 
 # Known Bug:
-# When using the login page, if the user attempts to log in as a user which
-# does not exist, no account will be created in the db, but the page will
-# redirect to a home page of a nonexistent user, bearing the name the person
-# attempted to sign in with
-
-# Known Bug:
 # Entering an incorrect password does not prevent the user from signing in
 
 app = Flask(__name__)
@@ -121,6 +115,8 @@ def login():
 
         # Otherwise, redirect the user to register a new account
         else:
+            session.pop("user", None)
+            session.pop("email", None)
             flash("User doesn't exist or password does not match!", "info")
             return redirect(url_for('register'))
         flash("Login Successful!", "info")
