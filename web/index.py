@@ -6,9 +6,6 @@ from second import second
 from helper_functions import getLoginStatus
 import hashlib
 
-# Known Bug:
-# Entering an incorrect password does not prevent the user from signing in
-
 app = Flask(__name__)
 app.secret_key = "A1WHhgMhpTvb63eeO@7Zyp38v7KwvWDR81EdgEe&"
 app.permanent_session_lifetime = timedelta(minutes=5)
@@ -77,7 +74,7 @@ def register():
             newUser = users(userName, "", userPassword)
             db.session.add(newUser)
             db.session.commit()
-        flash("Login Successful!", "info")
+        flash("Account Created Successfully", "info")
         return redirect(url_for('user'))
     
     # If there is already a user signed in
