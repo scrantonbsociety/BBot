@@ -77,7 +77,7 @@ def register():
             newUser = users(userName, "", userPassword)
             db.session.add(newUser)
             db.session.commit()
-        flash("Login Successful!", "info")
+        flash("Account Created Successfully", "info")
         return redirect(url_for('user'))
     
     # If there is already a user signed in

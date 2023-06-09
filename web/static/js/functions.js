@@ -1,5 +1,5 @@
 function setDarkMode() {
-    // I have no idea what the first variable is/does
+    // Body element gets 'darkmode' class
     var isDark = document.body.classList.toggle('darkmode');
     var themeBtn = document.getElementById('theme-btn');
 

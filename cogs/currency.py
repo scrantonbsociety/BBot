@@ -54,7 +54,7 @@ class Currency(commands.Cog):
             self.dbapi.currency.add(iid,"bot.currency",amount*2)
         else:
             await integration.response.send_message("Sorry! You lost your money.")
-"""     @app_commands.command()
+    @app_commands.command()
     async def bj(self, integration: discord.Integration, wager: float):
         user = integration.user
         iid = self.dbapi.user.get(user.id)
@@ -135,15 +135,6 @@ class Currency(commands.Cog):
         
         await integration.response.send_message("Your cards:\n{}\n{}\nDealer has {}, do you hit or stay?".format(playerDeck[0], playerDeck[1], dealerDeck[0]))
         
-        hit = client.get_emoji('U+1F44D')
-            stay = client.get_emoji()
-        doubleDown = client.get_emoji()
-        split = client.get_emoji()
-        insurance = client.get_emoji()
-
-        if 'cards' in message.content:
-            
-
         # Retrieve input from the player to hit or stay
 
         inPlay = True
@@ -160,7 +151,7 @@ class Currency(commands.Cog):
                 elif playerTotal > 21:
                     await integration.response.send_message("You drew a {}! You've gone bust! Thank you for playing.".format(playerDeck[len(playerDeck-1)]))
                     return None
-        # When the player stands, repeat this process for the dealer and program corresonding outcomes """
+        # When the player stands, repeat this process for the dealer and program corresonding outcomes
 
 
 async def setup(bot):
