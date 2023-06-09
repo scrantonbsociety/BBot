@@ -1,5 +1,5 @@
 from flask import Flask, redirect, url_for, render_template, request, session, flash, Blueprint
-from helper_functions import getLoginStatus
+from web.helper_functions import getLoginStatus
 
 second = Blueprint("second", __name__, static_folder="static", template_folder="templates")
 
