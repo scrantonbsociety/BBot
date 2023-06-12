@@ -3,6 +3,9 @@ from discord.ext import commands
 from discord import User
 from discord import app_commands
 import random
+import asyncio
+""" from PIL import Image
+import os """
 class Currency(commands.Cog):
     def __init__(self, nbot, dbapi):
         self.bot = nbot
@@ -66,29 +69,34 @@ class Currency(commands.Cog):
         if not self.dbapi.currency.deduct(iid,"bot.currency", wager):
             await integration.response.send_message("Not enough money to bet!")
             return None
-        # One deck of cards is used for simplicity (for now)
-        cards = ['aceOfSpades', 'twoOfSpades', 'threeOfSpades', 'fourOfSpades', 'fiveOfSpades', 'sixOfSpades', 'sevenOfSpades', 'eightOfSpades', 'nineOfSpades', 'tenOfSpades', 'jackOfSpades', 'queenOfSpades', 'kingOfSpades'
-                 'aceOfDiamonds', 'twoOfDiamonds', 'threeOfDiamonds', 'fourOfDiamonds', 'fiveOfDiamonds', 'sixOfDiamonds', 'sevenOfDiamonds', 'eightOfDiamonds', 'nineOfDiamonds', 'tenOfDiamonds', 'jackOfDiamonds', 'queenOfDiamonds', 'kingOfDiamonds'
-                 'aceOfClubs', 'twoOfClubs', 'threeOfClubs', 'fourOfClubs', 'fiveOfClubs', 'sixOfClubs', 'sevenOfClubs', 'eightOfClubs', 'nineOfClubs', 'tenOfClubs', 'jackOfClubs', 'queenOfClubs', 'kingOfClubs'
-                 'aceOfHearts', 'twoOfHearts', 'threeOfHearts', 'fourOfHearts', 'fiveOfHearts', 'sixOfHearts', 'sevenOfHearts', 'eightOfHearts', 'nineOfHearts', 'tenOfHearts', 'jackOfHearts', 'queenOfHearts', 'kingOfHearts']
-        dealerDeck = [cards.pop(random.randint(0, len(cards))), cards.pop(random.randint(0, len(cards)))]
-        playerDeck = [cards.pop(random.randint(0, len(cards))), cards.pop(random.randint(0, len(cards)))]
-        # This method does not work for the case: A 5 5 A
-        # As it would return 22 instead of 12
-        def evaluateAces(deck, total):
-            aceValue = 11 
-            for card in deck:
-                if 'ace' in card:
-                    # If the total goes over 21, hard set the value of aces to 1 and reevaluate.
-                    if total + 11 > 21:
-                        aceValue = 1
-                    total += aceValue
-            return total
 
-        def getDeckSum(deck):
+        cards = ['aceOfSpades', 'twoOfSpades', 'threeOfSpades', 'fourOfSpades', 'fiveOfSpades', 'sixOfSpades', 'sevenOfSpades', 'eightOfSpades', 'nineOfSpades', 'tenOfSpades', 'jackOfSpades', 'queenOfSpades', 'kingOfSpades',
+                 'aceOfDiamonds', 'twoOfDiamonds', 'threeOfDiamonds', 'fourOfDiamonds', 'fiveOfDiamonds', 'sixOfDiamonds', 'sevenOfDiamonds', 'eightOfDiamonds', 'nineOfDiamonds', 'tenOfDiamonds', 'jackOfDiamonds', 'queenOfDiamonds', 'kingOfDiamonds',
+                 'aceOfClubs', 'twoOfClubs', 'threeOfClubs', 'fourOfClubs', 'fiveOfClubs', 'sixOfClubs', 'sevenOfClubs', 'eightOfClubs', 'nineOfClubs', 'tenOfClubs', 'jackOfClubs', 'queenOfClubs', 'kingOfClubs',
+                 'aceOfHearts', 'twoOfHearts', 'threeOfHearts', 'fourOfHearts', 'fiveOfHearts', 'sixOfHearts', 'sevenOfHearts', 'eightOfHearts', 'nineOfHearts', 'tenOfHearts', 'jackOfHearts', 'queenOfHearts', 'kingOfHearts']
+        
+        # The standard in casinos if anywhere from 4-8 decks of cards
+        masterDeck = cards + cards + cards + cards
+        
+        def drawCard():
+            return masterDeck.pop(random.randint(0, len(cards)-1))
+            
+        faceCards = ['jack', 'queen', 'king']
+        dealerDeck = [drawCard(), drawCard()]
+        playerDeck = [drawCard(), drawCard()]
+        #playerDeck = ['twoOfSpades', 'twoOfDiamonds'] # For debugging split choice
+        #dealerDeck = ['aceOfSpades', drawCard()] # For debugging insurance choice
+        #dealerDeck = ['aceOfSpades', 'tenOfHearts']
+        #playerDeck = ['aceOfSpades', 'twoOfDiamonds']
+
+        def getDeckSum(hand):
             sum = 0
-            for card in deck:
-                if 'two' in card:
+            hasAce = False
+            for card in hand:
+                if 'ace' in card:
+                    sum += 11
+                    hasAce = True
+                elif 'two' in card:
                     sum += 2
                 elif 'three' in card:
                     sum += 3
@@ -104,74 +112,222 @@ class Currency(commands.Cog):
                     sum += 8
                 elif 'nine' in card:
                     sum += 9
-                elif 'ten' in card or 'jack' in card or 'queen' in card or 'king' in card:
+                elif 'ten' in card or card[0:card.index("Of")] in faceCards:
                     sum += 10
-            sum = evaluateAces(deck, sum)
+                if hasAce and sum > 21:
+                    sum -= 10
             return sum
-
-        # Three scenarios:
-        # Dealer has natural - Game ends immediately and bet is collected
-        # Player has natural - Game ends immediately and bet and a half is paid back
-        # Both dealer and player has natural - Game ends immediately and bet is paid back
-
-        dealerTotal = getDeckSum(dealerDeck)
-        playerTotal = getDeckSum(playerDeck)
-
-        # Need to make sure the dealer only checks for blackjack if a 10-value card is the up card
-        # If the up card is an ace, offer insurance
-        if dealerTotal == 21 and playerTotal == 21:
-            await integration.response.send_message("We both have blackjack! Game over.")
-            self.dbapi.currency.add(iid,"bot.currency", wager)
-            return None
-        elif dealerTotal == 21 and playerTotal != 21:
-            await integration.response.send_message("Dealer has blackjack! Thanks for playing!")
-            return None
-        elif dealerTotal != 21 and playerTotal == 21:
-            await integration.response.send_message("Congratulations! You have blackjack!")
-            self.dbapi.currency.add(iid,"bot.currency", wager * 1.5)
-            return None
         
-        def displayDeck(deck):
-            response = "Your cards:\n"
+        def displayDeck(deck, isDealer):
+            response = ""
+            if isDealer:
+                response += "Dealer's cards:\n"
+            else:
+                response += "Player cards:\n"
             for card in deck:
                 response += card + "\n"
             return response
         
-        options = ["🃏", "🛑", "⏬"]
+        dealerTotal = getDeckSum(dealerDeck)
+        playerTotal = getDeckSum(playerDeck)
 
-        # Evaluate if the cards have same face value, present option to split if true
-        firstMessage = f"{displayDeck(playerDeck)}Total: {playerTotal}\nDealer has {dealerDeck[0]} facing up\nDo you hit, stay, double down or surrender?"
-        if playerDeck[0][0:playerDeck[0].index("Of")] == playerDeck[1][0:playerDeck[1].index("Of")]:
-            options.append("🍌")
-            firstMessage = firstMessage[0:firstMessage.index("or")-1] + ", split," + firstMessage[firstMessage.index("or"):]
+        if playerTotal == 21:
+            gameEndMessage = displayDeck(playerDeck, False) + displayDeck(dealerDeck, True)
+            # If dealer also has blackjack, hand is a push
+            if dealerTotal == 21:
+                gameEndMessage += "You and the dealer both have blackjack! Hand is a push!\nThanks for playing!"
+                self.dbapi.currency.add(iid,"bot.currency", wager)
+            # If dealer does not have blackjack, pay 1.5 wager and end game
+            else:
+                gameEndMessage += f"Congratulations, you have blackjack!\nYou won {1.5 * wager}!"
+                self.dbapi.currency.add(iid,"bot.currency", (1.5 * wager))
+            await integration.response.send_message(gameEndMessage)
+            return None
         
-        options.append("🏳️")
-        await integration.channel.send(firstMessage)
-        # Should fix bug where first reaction would go on 2nd to last message
-        firstMessageObject = integration.channel.last_message
+        insurancePlaced = False
+        deckSplit = False
 
-        for option in options:
-            await firstMessageObject.add_reaction(option)
+        """ def renderHandImage(hand):
 
-        rxn = await integration.on_reaction_add("🃏", user)
-        await integration.channel.send(f"You reacted with {rxn}")
 
-        # Retrieve input from the player to hit or stay
-        """ inPlay = True
+            playingcardImgPath = '/cogs/images/playingcards/'
+
+            for card in hand:
+
+
+            embed = discord.Embed(
+                title = 'Blackjack Game',
+                description = 'Testing',
+                color = 0x481a6b
+            ).set_image(playingcardImgPath)
+
+        
+
+        await integration.response.send_message(embed=embed) """
+
+        async def presentBJTable():
+            options = ["🃏", "🛑"]
+            firstMessage = f"{displayDeck(playerDeck, False)}Total: {getDeckSum(playerDeck)}\nDealer has {dealerDeck[0]} facing up\nDo you hit, stay, or surrender?"
+
+            # Evaluate if the cards have same face value, present option to split if true
+            if ((playerDeck[0][0:playerDeck[0].index("Of")] == playerDeck[1][0:playerDeck[1].index("Of")] or 
+                (playerDeck[0][0:playerDeck[0].index("Of")] in faceCards and playerDeck[1][0:playerDeck[1].index("Of")] in faceCards)) and
+                not deckSplit):
+                options.append("🍌")
+                firstMessage = firstMessage[0:firstMessage.index("or")-1] + " split, " + firstMessage[firstMessage.index("or"):]
+            
+            # Evaluate if the player has enough money to double down, present option if so
+            if self.dbapi.currency.deduct(iid,"bot.currency", wager):
+                # Possible bug here if program stops after condition check but before refund
+                self.dbapi.currency.add(iid, "bot.currency", wager)
+                options.append('⏬')
+                firstMessage = firstMessage[0:firstMessage.index("or")-1] + " double down, " + firstMessage[firstMessage.index("or"):]
+
+            # Evaluate if the dealer has an ace as their up-card, and offer the player insurance if so
+            if dealerDeck[0][0:dealerDeck[0].index("Of")] == 'ace' and not insurancePlaced:
+                options.append('💼')
+                firstMessage = firstMessage[0:firstMessage.index("or")-1] + " buy insurace, " + firstMessage[firstMessage.index("or"):]
+            
+            options.append("🏳️")
+            await integration.channel.send(firstMessage)
+            # Should fix bug where first reaction would go on 2nd to last message
+            # If there's a better way to target 'firstMessage' please tell me
+            firstMessageObject = integration.channel.last_message
+
+            # Present choices for player to make in the form of reactions
+            for option in options:
+                await firstMessageObject.add_reaction(option)
+
+        def check(reaction: discord.Reaction, user: discord.User):
+            if reaction.emoji in ['🃏', '🛑', '⏬', '💼', '🍌', '🏳️'] and not user.bot:
+                return True
+            return False
+        
+        async def getPlayerChoice():
+            try:
+                reaction, user = await self.bot.wait_for('reaction_add', timeout=60.0, check=check)
+            except asyncio.TimeoutError:
+                await integration.channel.send('👎')
+            else:
+                await integration.channel.send(reaction.emoji)
+            return reaction.emoji
+        
+        # Main gameplay loop for the player
+        inPlay = True
         while inPlay:
-            await integration.response.send_message(displayDeck(playerDeck) + "\nDo you hit or stay?")
-            if True: # Player choses to hit
-                # Order is imporant because it is true to the game
-                playerDeck.append(cards.pop(random.randint(0, len(cards))))
-                playerTotal = getDeckSum(playerDeck)
-                if playerTotal == 21:
-                    await integration.response.send_message("You drew a {}! Blackjack! Congratulations!".format(playerDeck[len(playerDeck-1)]))
-
+            await presentBJTable()
+            playerChoice = await getPlayerChoice()
+            if playerChoice == "🃏": # Player hits
+                playerDeck.append(drawCard())
+            elif playerChoice == "🛑": # Player stays
+                inPlay = False
+            elif playerChoice == "⏬": # Player Doubles Down
+                self.dbapi.currency.deduct(iid,"bot.currency", wager)
+                playerDeck.append(drawCard())
+                inPlay = False
+            elif playerChoice == "💼": # Player purchases insurance
+                insurancePlaced = True
+                # Bet of half of the wager, if possible
+                if not self.dbapi.currency.deduct(iid, "bot.currency", int((0.5 * wager) + 0.5)):
+                    await integration.channel.send('Not enough money to bet insurance!')
+                # Dealer has blackjack, game ends
+                elif dealerDeck[1][0:dealerDeck[1].index("Of")] in faceCards or dealerDeck[1][0:dealerDeck[1].index("Of")] == 'ten':
+                    await integration.channel.send('Dealer has blackjack! Good call!')
+                    self.dbapi.currency.add(iid, "bot.currency", wager)
+                    inPlay = False
                     return None
-                elif playerTotal > 21:
-                    await integration.response.send_message("You drew a {}! You've gone bust! Thank you for playing.".format(playerDeck[len(playerDeck-1)]))
-                    return None """
-        # When the player stands, repeat this process for the dealer and program corresonding outcomes
+                # Dealer does not have blackjack, losing the insurance bet
+                else: # Note insurance bet has already been deducted
+                    await integration.channel.send('No blackjack! Insurance bet lost.')
+            elif playerChoice == "🍌": # Player splits hand
+                # Split deck into two separate hands, and alternate between both hands
+                # This will be a joy to program
+                inPlay = False
+            elif playerChoice == "🏳️": # Player surrenders
+                self.dbapi.currency.add(iid, "bot.currency", int((0.5 * wager) + 0.5))
+                inPlay = False
+                await integration.channel.send('Understood, thanks for playing!')
+                return None
+            elif playerChoice == "👎": # Player does not choose in time
+                await integration.channel.send('Too long to respond! Game over!')
+                inPlay = False
+            else:
+                await integration.channel.send('Invalid choice! Please select from the choices provided.')
+
+            # Player cannot split or place insurace after first round
+            if not deckSplit:
+                deckSplit = True
+            
+            if not insurancePlaced:
+                insurancePlaced = True
+
+            playerTotal = getDeckSum(playerDeck)
+
+            if playerTotal == 21:
+                await integration.channel.send(displayDeck(playerDeck, False) + "Total: " + str(playerTotal))
+                await integration.channel.send('You have blackjack!')
+                inPlay = False
+            elif playerTotal > 21:
+                await integration.channel.send(displayDeck(playerDeck, False) + "Total: " + str(playerTotal))
+                await integration.channel.send('Over 21! You\'ve gone bust!')
+                inPlay = False
+
+        # Dealer gameplay algorithm
+        dealerInPlay = True
+        while dealerInPlay:
+            dealerTotal = getDeckSum(dealerDeck)
+            await integration.channel.send(displayDeck(dealerDeck, True) + "Total: " + str(dealerTotal))
+            if dealerTotal > 21:
+                await integration.channel.send('Dealer has gone bust!')
+                dealerInPlay = False
+            elif dealerTotal == 21:
+                await integration.channel.send('Dealer has blackjack!')
+                dealerInPlay = False
+            elif 17 < dealerTotal < 21: # I'll figure out how to determine if it's a hard or soft 17 and adjust accordingly
+                await integration.channel.send('Dealer stays!')
+                dealerInPlay = False
+            else:
+                await integration.channel.send('Dealer hits!')
+                dealerDeck.append(drawCard())
+        
+        # Determine the outcome of the game given the player's and dealer's hands
+        gameOutcome = ''
+        if dealerTotal > 21: # Player can get <= 21 or bust
+            if playerTotal > 21:
+                gameOutcome = 'Push'
+            else:
+                gameOutcome = 'Player'
+        elif dealerTotal == 21: # Player either gets blackjack or loses otherwise
+            if playerTotal == 21:
+                gameOutcome = 'Push'
+            else:
+                gameOutcome = 'Dealer'
+        else: # dealerTotal < 21
+            if playerTotal > 21:
+                gameOutcome = 'Dealer'
+            elif playerTotal == 21:
+                gameOutcome = 'Player'
+            else:
+                if playerTotal > dealerTotal:
+                    gameOutcome = 'Player'
+                elif playerTotal == dealerTotal:
+                    gameOutcome = 'Push'
+                else:
+                    gameOutcome = 'Dealer'
+        
+        # Conclude the game and payout accordingly
+        if gameOutcome == 'Dealer':
+            await integration.channel.send('Dealer wins!')
+        elif gameOutcome == 'Push':
+            await integration.channel.send('Hand is a push!\nOriginal wager is returned.')
+        elif gameOutcome == 'Player':
+            await integration.channel.send(f'Player wins!\nPayout: {1.5 * wager}')
+            self.dbapi.currency.add(iid, "bot.currency", int(1.5 * wager))
+        else:
+            await integration.channel.send(f'The devs didn\'t consider this scenario, please contact one about this game immediately!\nCourtesy Payout: {2 * wager}')
+            self.dbapi.currency.add(iid, "bot.currency", int(2 * wager))
+            
+        await integration.channel.send('Thanks for playing!')
 
 
 async def setup(bot):
